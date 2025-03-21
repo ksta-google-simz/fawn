@@ -16,9 +16,7 @@ import face_alignment
 from utils.anonymize_faces_in_image import anonymize_faces_in_image
 from face_alignment import FaceAlignment, LandmarksType
 from utils.face_embedding import save_exclusion_faces
-import os
-from evaluation import eval_fid
-
+import sys
 
 # 📌 2️⃣ 익명화 모델 로드
 face_model_id = "hkung/face-anon-simple"
@@ -58,52 +56,55 @@ pipe = pipe.to("cuda")
 
 generator = torch.manual_seed(1)  # 랜덤성 고정하여 동일한 결과 출력
 
-# 익명화할 이미지가 저장된 폴더 경로
-input_folder = "my_dataset/original/"
-output_folder = "my_dataset/anonymized/"
 
-# 출력 폴더가 없으면 생성
-os.makedirs(output_folder, exist_ok=True)
+def get_single_anon(input_folder, output_folder, num_inference_steps, anonymization_degree):
+    # 익명화할 이미지가 저장된 폴더 경로
+    # input_folder = "my_dataset/original/"
+    # output_folder = "my_dataset/anonymized/"
 
-# 폴더 내 모든 이미지 파일 가져오기
-image_files = [f for f in os.listdir(input_folder) if f.endswith((".png", ".jpg", ".jpeg"))]
+    # 입력 폴더가 없으면 경고 후 종료
+    if not os.path.exists(input_folder):
+        print(f"경고: ]]입력 폴더 '{input_folder}'가 존재하지 않습니다.", file=sys.stderr)
+        sys.exit(1)
 
-# 이미지 익명화 진행
-for image_file in image_files:
-    input_path = os.path.join(input_folder, image_file)  # 원본 이미지 경로
-     # 파일명과 확장자 분리
-    filename, ext = os.path.splitext(image_file)
-    
-    # 익명화된 이미지 저장 경로 (원본파일명_anon.확장자)
-    output_path = os.path.join(output_folder, f"{filename}_anon{ext}")
-    
-    print(f"🔄 익명화 진행: {image_file}")
+    # 출력 폴더가 없으면 생성
+    os.makedirs(output_folder, exist_ok=True)
 
-    # 원본 이미지 로드
-    original_image = load_image(input_path)
-    # SFD (likely best results, but slower)
+    # 폴더 내 모든 이미지 파일 가져오기
+    image_files = [f for f in os.listdir(input_folder) if f.endswith((".png", ".jpg", ".jpeg"))]
 
-    fa = face_alignment.FaceAlignment(
-    face_alignment.LandmarksType.TWO_D, face_detector="sfd"
-    )
-    # generate an image that anonymizes faces
-    anon_image = anonymize_faces_in_image(
-        image=original_image,
-        face_alignment=fa,
-        pipe=pipe,
-        generator=generator,
-        face_image_size=512,
-        num_inference_steps=25,
-        guidance_scale=4.0,
-        anonymization_degree=1.25,
-    )
-    # 이미지 저장
-    anon_image.save(output_path)
-    print(f"✅ 저장 완료: {output_path}")
+    # 이미지 익명화 진행
+    for image_file in image_files:
+        input_path = os.path.join(input_folder, image_file)  # 원본 이미지 경로
+        # 파일명과 확장자 분리
+        filename, ext = os.path.splitext(image_file)
+        
+        # 익명화된 이미지 저장 경로 (원본파일명_anon.확장자)
+        output_path = os.path.join(output_folder, f"{filename}_anon{ext}")
+        
+        print(f"🔄 익명화 진행: {image_file}")
+
+        # 원본 이미지 로드
+        original_image = load_image(input_path)
+        # SFD (likely best results, but slower)
+
+        fa = face_alignment.FaceAlignment(
+        face_alignment.LandmarksType.TWO_D, face_detector="sfd"
+        )
+        # generate an image that anonymizes faces
+        anon_image = anonymize_faces_in_image(
+            image=original_image,
+            face_alignment=fa,
+            pipe=pipe,
+            generator=generator,
+            face_image_size=512,
+            num_inference_steps=num_inference_steps,
+            guidance_scale=4.0,
+            anonymization_degree=anonymization_degree,
+        )
+        # 이미지 저장
+        anon_image.save(output_path)
+        print(f"✅ 저장 완료: {output_path}")
 
 
-print("🎉 모든 이미지 익명화 완료!")
-
-eval_fid(input_folder,output_folder)
-
-
+    print("🎉 모든 이미지 익명화 완료!")
