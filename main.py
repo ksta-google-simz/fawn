@@ -30,7 +30,7 @@ def main():
     print("#" * 100)
     
     eval_fid(args.origin_path, args.anon_path)
-    
+
     print("#" * 100)
     
     process_images_to_pickle(args.origin_path, {}, 'original')
@@ -43,13 +43,13 @@ def main():
     with open("anonymized_embeddings.pkl", "rb") as f:
         anonymized_embeddings = pickle.load(f)
 
-    with open("original_embeddings.pkl", "rb") as f:
+    with open("dataset_embeddings.pkl", "rb") as f:
         dataset_embeddings = pickle.load(f)
 
     identification_score = face_identification_reid(original_embeddings, anonymized_embeddings, dataset_embeddings)
     
     # ✅ 결과 출력
-    print(f"🔹 Face Verification Re-ID Rate: {identification_score * 100:.2f}%")
+    print(f"🔹 Face Identification (1:N) Re-ID Rate: {identification_score * 100:.2f}%")
 
     # print("#" * 100)
     # orig_stats, anon_stats, diff_stats, diff_df = compare_agr(args.origin_path, args.anon_path, args.label_path)

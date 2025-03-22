@@ -77,7 +77,7 @@ def get_single_anon(input_folder, output_folder, num_inference_steps, anonymizat
         filename, ext = os.path.splitext(image_file)
         
         # 익명화된 이미지 저장 경로 (원본파일명_anon.확장자)
-        output_path = os.path.join(output_folder, f"{filename}_anon{ext}")
+        output_path = os.path.join(output_folder, f"{filename}{ext}")
         
         print(f"🔄 익명화 진행: {image_file}")
 
