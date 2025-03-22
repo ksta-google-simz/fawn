@@ -1,10 +1,9 @@
 import os
 from diffusers.utils import load_image
-from PIL import Image
 import torch
 from transformers import CLIPImageProcessor, CLIPVisionModel
 from diffusers import AutoencoderKL, DDPMScheduler
-from diffusers.utils import load_image, make_image_grid
+from diffusers.utils import load_image
 from src.diffusers.models.referencenet.referencenet_unet_2d_condition import (
     ReferenceNetModel,
 )
@@ -14,8 +13,6 @@ from src.diffusers.pipelines.referencenet.pipeline_referencenet import (
 )
 import face_alignment
 from utils.anonymize_faces_in_image import anonymize_faces_in_image
-from face_alignment import FaceAlignment, LandmarksType
-from utils.face_embedding import save_exclusion_faces
 import sys
 
 # 📌 2️⃣ 익명화 모델 로드

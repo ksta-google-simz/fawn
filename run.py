@@ -49,7 +49,7 @@ pipe = StableDiffusionReferenceNetPipeline(
 )
 
 # 📌 3️⃣ 디바이스 설정 (Mac 사용자는 MPS 활용)
-device = "cpu"
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 pipe = pipe.to(device)
 
 generator = torch.manual_seed(1)  # 랜덤성 고정하여 동일한 결과 출력
