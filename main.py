@@ -21,19 +21,19 @@ def main():
     get_single_anon(args.origin_path, args.anon_path, args.num_inference_steps, args.anonymization_degree)
     print("#" * 100)
     eval_fid(args.origin_path, args.anon_path)
-    print("#" * 100)
-    orig_stats, anon_stats, diff_stats, diff_df = compare_agr(args.origin_path, args.anon_path, args.label_path)
-    print("\nOriginal image statistics:")
-    for key, value in orig_stats.items():
-        print(f"{key}: {value:.4f}")
-    print("\nAnonymized image statistics:")
-    for key, value in anon_stats.items():
-        print(f"{key}: {value:.4f}")
-    print("\nDifference statistics:")
-    for key, value in diff_stats.items():
-        print(f"{key}: {value:.4f}")
-    print("\nFirst few comparison results:")
-    print(diff_df.head())
+    # print("#" * 100)
+    # orig_stats, anon_stats, diff_stats, diff_df = compare_agr(args.origin_path, args.anon_path, args.label_path)
+    # print("\nOriginal image statistics:")
+    # for key, value in orig_stats.items():
+    #     print(f"{key}: {value:.4f}")
+    # print("\nAnonymized image statistics:")
+    # for key, value in anon_stats.items():
+    #     print(f"{key}: {value:.4f}")
+    # print("\nDifference statistics:")
+    # for key, value in diff_stats.items():
+    #     print(f"{key}: {value:.4f}")
+    # print("\nFirst few comparison results:")
+    # print(diff_df.head())
 
 if __name__ == "__main__":
     main()
