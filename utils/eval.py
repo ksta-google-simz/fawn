@@ -1,6 +1,6 @@
 import shutil
 import os
-os.environ["TF_ENABLE_ONEDNN_OPTS"]="0"
+os.environ["TF_ENABLE_ONEDNN_OPTS"] = "0"
 
 from pytorch_fid import fid_score
 from deepface import DeepFace
@@ -60,6 +60,7 @@ def eval_fid(original_dir, anonymized_dir):
         print("⚠️ 평가 가능한 이미지 쌍이 없습니다.")
         return [], None
 
+
 race_mapping = {
     'White': 'white',
     'Black': 'black',
@@ -101,7 +102,7 @@ def compute_gender_cross_entropy(prediction, true_label):
         true_value = 1.0 if true_label.lower() == 'female' else 0.0
         
         # Binary Cross Entropy 계산
-        epsilon = 1e-15  # 로그 계산 시 0 방지를 위한 작은 값
+        epsilon = 1e-15
         prob_female = np.clip(prob_female, epsilon, 1 - epsilon)
         cross_entropy = -(true_value * np.log(prob_female) + (1 - true_value) * np.log(1 - prob_female))
         
@@ -129,14 +130,9 @@ def compute_race_cross_entropy(prediction, true_label):
         cross_entropy = 0
         
         for race, prob in race_probs.items():
-            # 확률을 0~1 범위로 정규화
             normalized_prob = prob / total_prob
             normalized_prob = np.clip(normalized_prob, epsilon, 1 - epsilon)
-            
-            # 실제 라벨이면 1, 아니면 0
             true_value = 1.0 if race == true_race else 0.0
-            
-            # Cross Entropy 누적
             cross_entropy -= true_value * np.log(normalized_prob)
         
         return cross_entropy
@@ -144,22 +140,34 @@ def compute_race_cross_entropy(prediction, true_label):
         print(f"Error in race cross entropy calculation: {str(e)}")
         return 0.0
 
+# ▶ 여러 얼굴 혹은 단 하나의 얼굴 검출 시 모두 대응하기 위한 보조 함수
+def to_single_result(pred):
+    """
+    DeepFace.analyze() 결과가 list 또는 dict일 수 있으므로
+    list면 첫 번째 요소, dict면 그대로 반환.
+    """
+    if isinstance(pred, list):
+        if len(pred) > 0:
+            return pred[0]
+        else:
+            return None
+    elif isinstance(pred, dict):
+        return pred
+    else:
+        return None
+
 def compare_agr(original_dir, anonymized_dir, label_path, save_csv=True):
-    # 라벨 데이터 로드
     labels_df = pd.read_csv(label_path)
     
-    # 파일 이름 형식 변환 (val/5001.jpg -> 5001_anon.jpg)
+    # 파일 이름 형식 변환 (예: val/5001.jpg -> 5001_anon.jpg)
     labels_df['file'] = labels_df['file'].apply(lambda x: os.path.basename(x).split('.')[0] + '_anon.jpg')
     
-    # 결과를 저장할 변수 초기화
     differences = []
     total_predictions = 0
     
-    # 이미지 파일 목록 가져오기 (익명화된 이미지 기준)
     image_files = glob.glob(os.path.join(anonymized_dir, "*.jpg")) + \
-                 glob.glob(os.path.join(anonymized_dir, "*.png"))
+                  glob.glob(os.path.join(anonymized_dir, "*.png"))
     
-    # 원본과 익명화 이미지 각각의 메트릭을 저장할 변수 초기화
     orig_metrics = {
         'age_errors': [],
         'gender_correct': 0,
@@ -177,54 +185,54 @@ def compare_agr(original_dir, anonymized_dir, label_path, save_csv=True):
     
     for anon_path in tqdm(image_files):
         try:
-            # 파일 이름에서 ID 추출
             img_id = os.path.basename(anon_path)
             orig_path = os.path.join(original_dir, img_id.replace('_anon', ''))
             
             # 해당 이미지의 라벨 찾기
             img_label = labels_df[labels_df['file'] == img_id].iloc[0]
             
-            # Original 이미지 예측
-            orig_pred = DeepFace.analyze(orig_path, actions=['age', 'gender', 'race'], 
-                                       align=True, detector_backend='mtcnn')
+            # 원본 이미지 분석
+            orig_pred_raw = DeepFace.analyze(
+                orig_path, actions=['age', 'gender', 'race'], 
+                align=True, detector_backend='mtcnn'
+            )
+            # 익명화 이미지 분석
+            anon_pred_raw = DeepFace.analyze(
+                anon_path, actions=['age', 'gender', 'race'], 
+                align=True, detector_backend='mtcnn'
+            )
             
-            # Anonymized 이미지 예측
-            anon_pred = DeepFace.analyze(anon_path, actions=['age', 'gender', 'race'], 
-                                       align=True, detector_backend='mtcnn')
-            
-            if not orig_pred or not anon_pred or \
-               not isinstance(orig_pred, list) or not isinstance(anon_pred, list) or \
-               len(orig_pred) == 0 or len(anon_pred) == 0:
+            # 리스트/딕셔너리 상태에 따라 단일 결과만 추출
+            orig_pred = to_single_result(orig_pred_raw)
+            anon_pred = to_single_result(anon_pred_raw)
+
+            if (orig_pred is None) or (anon_pred is None):
                 print(f"Invalid prediction format for {img_id}")
                 continue
             
-            orig = orig_pred[0]
-            anon = anon_pred[0]
-            
-            # 결과 딕셔너리 초기화
+            # 결과 딕셔너리 구성
             result = {
                 'file_name': img_id,
                 'true_age_group': img_label['age'],
-                'orig_age': orig.get('age', 0),
-                'anon_age': anon.get('age', 0),
+                'orig_age': orig_pred.get('age', 0),
+                'anon_age': anon_pred.get('age', 0),
                 'true_gender': img_label['gender'],
-                'orig_gender': convert_gender(orig.get('dominant_gender', '')),
-                'anon_gender': convert_gender(anon.get('dominant_gender', '')),
+                'orig_gender': convert_gender(orig_pred.get('dominant_gender', '')),
+                'anon_gender': convert_gender(anon_pred.get('dominant_gender', '')),
                 'true_race': img_label['race'],
-                'orig_race': orig.get('dominant_race', '').lower(),
-                'anon_race': anon.get('dominant_race', '').lower()
+                'orig_race': orig_pred.get('dominant_race', '').lower(),
+                'anon_race': anon_pred.get('dominant_race', '').lower()
             }
             
-            # 나이 차이 계산
+            # 나이 에러 계산
             try:
                 true_age = convert_age_to_number(img_label['age'])
-                orig_age_error = abs(true_age - orig.get('age', 0))
-                anon_age_error = abs(true_age - anon.get('age', 0))
+                orig_age_error = abs(true_age - orig_pred.get('age', 0))
+                anon_age_error = abs(true_age - anon_pred.get('age', 0))
                 result['age_error_diff'] = anon_age_error - orig_age_error
                 result['orig_age_match'] = orig_age_error <= 5
                 result['anon_age_match'] = anon_age_error <= 5
                 
-                # 각각의 에러 저장
                 orig_metrics['age_errors'].append(orig_age_error)
                 anon_metrics['age_errors'].append(anon_age_error)
             except Exception as e:
@@ -232,20 +240,18 @@ def compare_agr(original_dir, anonymized_dir, label_path, save_csv=True):
             
             # 성별 비교
             try:
-                orig_gender = convert_gender(orig.get('dominant_gender', ''))
-                anon_gender = convert_gender(anon.get('dominant_gender', ''))
-                result['orig_gender_match'] = orig_gender.lower() == img_label['gender'].lower()
-                result['anon_gender_match'] = anon_gender.lower() == img_label['gender'].lower()
+                orig_gender = convert_gender(orig_pred.get('dominant_gender', ''))
+                anon_gender = convert_gender(anon_pred.get('dominant_gender', ''))
+                result['orig_gender_match'] = (orig_gender.lower() == img_label['gender'].lower())
+                result['anon_gender_match'] = (anon_gender.lower() == img_label['gender'].lower())
                 
-                # 각각의 정확도 카운트
                 if result['orig_gender_match']:
                     orig_metrics['gender_correct'] += 1
                 if result['anon_gender_match']:
                     anon_metrics['gender_correct'] += 1
                 
-                # CrossEntropy 계산 및 저장
-                orig_gender_ce = compute_gender_cross_entropy(orig, img_label['gender'])
-                anon_gender_ce = compute_gender_cross_entropy(anon, img_label['gender'])
+                orig_gender_ce = compute_gender_cross_entropy(orig_pred, img_label['gender'])
+                anon_gender_ce = compute_gender_cross_entropy(anon_pred, img_label['gender'])
                 result['gender_ce_diff'] = anon_gender_ce - orig_gender_ce
                 
                 orig_metrics['gender_losses'].append(orig_gender_ce)
@@ -256,18 +262,16 @@ def compare_agr(original_dir, anonymized_dir, label_path, save_csv=True):
             # 인종 비교
             try:
                 mapped_true_race = race_mapping.get(img_label['race'], img_label['race'].lower())
-                result['orig_race_match'] = orig.get('dominant_race', '').lower() == mapped_true_race
-                result['anon_race_match'] = anon.get('dominant_race', '').lower() == mapped_true_race
+                result['orig_race_match'] = (orig_pred.get('dominant_race', '').lower() == mapped_true_race)
+                result['anon_race_match'] = (anon_pred.get('dominant_race', '').lower() == mapped_true_race)
                 
-                # 각각의 정확도 카운트
                 if result['orig_race_match']:
                     orig_metrics['race_correct'] += 1
                 if result['anon_race_match']:
                     anon_metrics['race_correct'] += 1
                 
-                # CrossEntropy 계산 및 저장
-                orig_race_ce = compute_race_cross_entropy(orig, img_label['race'])
-                anon_race_ce = compute_race_cross_entropy(anon, img_label['race'])
+                orig_race_ce = compute_race_cross_entropy(orig_pred, img_label['race'])
+                anon_race_ce = compute_race_cross_entropy(anon_pred, img_label['race'])
                 result['race_ce_diff'] = anon_race_ce - orig_race_ce
                 
                 orig_metrics['race_losses'].append(orig_race_ce)
@@ -282,10 +286,9 @@ def compare_agr(original_dir, anonymized_dir, label_path, save_csv=True):
             print(f"Error processing {img_id}: {str(e)}")
             continue
     
-    # 결과를 DataFrame으로 변환
     diff_df = pd.DataFrame(differences)
     
-    # 원본과 익명화 이미지 각각의 메트릭 계산
+    # 원본/익명화 통계 계산
     orig_stats = {
         'age_mae': np.mean(orig_metrics['age_errors']) if orig_metrics['age_errors'] else 0,
         'gender_acc': orig_metrics['gender_correct'] / total_predictions if total_predictions > 0 else 0,
@@ -302,7 +305,6 @@ def compare_agr(original_dir, anonymized_dir, label_path, save_csv=True):
         'race_ce': np.mean(anon_metrics['race_losses']) if anon_metrics['race_losses'] else 0
     }
     
-    # 차이에 대한 통계 계산
     diff_stats = {
         'total_images': total_predictions,
         'age_error_increased': (diff_df['age_error_diff'] > 0).mean() if 'age_error_diff' in diff_df else 0,
@@ -313,7 +315,7 @@ def compare_agr(original_dir, anonymized_dir, label_path, save_csv=True):
         'avg_race_ce_diff': diff_df['race_ce_diff'].mean() if 'race_ce_diff' in diff_df else 0
     }
     
-    # 결과를 CSV로 저장
+    # CSV 저장
     if save_csv:
         diff_df.to_csv('comparison_results.csv', index=False)
     
