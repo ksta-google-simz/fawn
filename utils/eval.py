@@ -186,11 +186,11 @@ def compare_agr(original_dir, anonymized_dir, label_path, save_csv=True):
             
             # Original 이미지 예측
             orig_pred = DeepFace.analyze(orig_path, actions=['age', 'gender', 'race'], 
-                                       align=True, detector_backend='retinaface')
+                                       align=True, detector_backend='mtcnn')
             
             # Anonymized 이미지 예측
             anon_pred = DeepFace.analyze(anon_path, actions=['age', 'gender', 'race'], 
-                                       align=True, detector_backend='retinaface')
+                                       align=True, detector_backend='mtcnn')
             
             if not orig_pred or not anon_pred or \
                not isinstance(orig_pred, list) or not isinstance(anon_pred, list) or \
