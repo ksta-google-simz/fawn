@@ -3,7 +3,6 @@ import os
 os.environ["TF_ENABLE_ONEDNN_OPTS"] = "0"
 
 from pytorch_fid import fid_score
-from deepface import DeepFace
 import pandas as pd
 import glob
 from tqdm import tqdm
