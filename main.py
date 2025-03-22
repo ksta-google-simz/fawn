@@ -1,6 +1,6 @@
 import argparse
 from single_anon import get_single_anon
-from utils.eval import eval_fid, compare_agr
+from utils.eval import eval_fid
 
 
 def main():
