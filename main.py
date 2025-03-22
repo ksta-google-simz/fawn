@@ -1,5 +1,6 @@
 import argparse
 import pickle
+import time
 from single_anon import get_single_anon
 from utils.eval import eval_fid, process_images_to_pickle, face_identification_reid
 
@@ -17,12 +18,19 @@ def main():
     print("#  ✅ 입력 받은 인자:")
     for arg, value in vars(args).items():
         print(f"#  📌 {arg}: {value}")
+
     print("#" * 50)
 
+    start_time = time.time()
     get_single_anon(args.origin_path, args.anon_path, args.num_inference_steps, args.anonymization_degree)
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+    print(f"🔹 익명화에 걸린 시간: {elapsed_time:.2f}초")
+
     print("#" * 100)
     
     eval_fid(args.origin_path, args.anon_path)
+    
     print("#" * 100)
     
     process_images_to_pickle(args.origin_path, {}, 'original')
