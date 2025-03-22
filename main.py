@@ -1,6 +1,7 @@
 import argparse
+import pickle
 from single_anon import get_single_anon
-from utils.eval import eval_fid
+from utils.eval import eval_fid, process_images_to_pickle, face_identification_reid
 
 
 def main():
@@ -20,7 +21,28 @@ def main():
 
     get_single_anon(args.origin_path, args.anon_path, args.num_inference_steps, args.anonymization_degree)
     print("#" * 100)
+    
     eval_fid(args.origin_path, args.anon_path)
+    print("#" * 100)
+    
+    process_images_to_pickle(args.origin_path, {}, 'original')
+    process_images_to_pickle(args.anon_path, {}, 'anonymized')
+
+    # ✅ 저장된 얼굴 벡터 로드
+    with open("original_embeddings.pkl", "rb") as f:
+        original_embeddings = pickle.load(f)
+
+    with open("anonymized_embeddings.pkl", "rb") as f:
+        anonymized_embeddings = pickle.load(f)
+
+    with open("original_embeddings.pkl", "rb") as f:
+        dataset_embeddings = pickle.load(f)
+
+    identification_score = face_identification_reid(original_embeddings, anonymized_embeddings, dataset_embeddings)
+    
+    # ✅ 결과 출력
+    print(f"🔹 Face Verification Re-ID Rate: {identification_score * 100:.2f}%")
+
     # print("#" * 100)
     # orig_stats, anon_stats, diff_stats, diff_df = compare_agr(args.origin_path, args.anon_path, args.label_path)
     # print("\nOriginal image statistics:")

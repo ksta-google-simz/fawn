@@ -9,6 +9,10 @@ from tqdm import tqdm
 import numpy as np
 from scipy.spatial.distance import cosine
 
+import pickle
+import face_recognition
+from PIL import Image
+
 def eval_fid(original_dir, anonymized_dir):
     temp_dir = "./temp_eval"
     os.makedirs(temp_dir, exist_ok=True)
@@ -319,6 +323,65 @@ def compare_agr(original_dir, anonymized_dir, label_path, save_csv=True):
         diff_df.to_csv('comparison_results.csv', index=False)
     
     return orig_stats, anon_stats, diff_stats, diff_df
+
+
+# ✅ 지원하는 이미지 확장자 목록
+IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".bmp", ".tiff"}
+
+def is_valid_image(filename):
+    """유효한 이미지 파일인지 검사"""
+    return filename.lower().endswith(tuple(IMAGE_EXTENSIONS))
+
+def process_images_to_pickle(folder_path, embedding_dict, category):
+    """ 이미지 폴더를 순회하며 face_recognition을 사용하여 얼굴 벡터 추출 """
+    image_count = 0
+    total_images = [f for f in os.listdir(folder_path) if is_valid_image(f)]
+    
+    print(f"\n📂 {category} 이미지 파일 개수: {len(total_images)}")
+
+    failed_images = []
+    no_face_detected = []
+
+    for filename in total_images:
+        img_path = os.path.join(folder_path, filename)
+
+        try:
+            img = face_recognition.load_image_file(img_path)  # ✅ `face_recognition`으로 이미지 로드
+        except Exception as e:
+            print(f"❌ 이미지 로드 실패: {filename}, 오류: {e}")
+            failed_images.append(img_path)
+            continue  # 이미지 로드 실패 시 건너뜀
+
+        face_encodings = face_recognition.face_encodings(img)  # 🔥 얼굴 임베딩 생성
+
+        if face_encodings:
+            print(f"🚀 {filename}에서 감지된 얼굴 수: {len(face_encodings)}")  # ✅ 감지된 얼굴 개수 출력
+            embedding_dict[filename] = face_encodings[0]  # ✅ 첫 번째 얼굴 벡터 저장
+            image_count += 1
+        else:
+            print(f"⚠️ {filename}에서 얼굴 감지 실패")  
+            no_face_detected.append(img_path)
+            # Image.open(img_path).save(os.path.join(failed_image_path, filename))  # ❌ 감지 실패한 이미지 저장
+
+    # ✅ 실패한 이미지 파일 출력
+    if failed_images:
+        print("\n🚨 로드 실패한 이미지 목록:")
+        for failed_img in failed_images:
+            print(f"❌ {failed_img}")
+    
+    if no_face_detected:
+        print("\n⚠️ 얼굴 감지 실패한 이미지 목록 (감지 실패 이미지 저장됨):")
+        for img in no_face_detected:
+            print(f"⚠️ {img}")
+    
+    # ✅ 최종 통계 출력
+    print("\n📌 최종 이미지 데이터 개수")
+    print(f"✅ {category} 이미지 개수: {image_count}")
+
+    # 🔹 벡터 파일 저장 (pickle 사용)
+    with open(f"{category}_embeddings.pkl", "wb") as f:
+        pickle.dump(embedding_dict, f)
+    print("✅ 얼굴 벡터 저장 완료!")
 
 
 # ✅ 1:N 얼굴 식별 (Face Identification)
