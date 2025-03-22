@@ -25,7 +25,7 @@ def eval_fid(original_dir, anonymized_dir):
             continue
 
         filename, ext = os.path.splitext(file)
-        anon_file = f"{filename}_anon{ext}"
+        anon_file = f"{filename}{ext}"
         original_path = os.path.join(original_dir, file)
         anonymized_path = os.path.join(anonymized_dir, anon_file)
 
