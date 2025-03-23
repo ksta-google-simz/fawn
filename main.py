@@ -33,7 +33,7 @@ def main():
 
     print("#" * 100)
     
-    process_images_to_pickle(args.origin_path, {}, 'original')
+    # process_images_to_pickle(args.origin_path, {}, 'original')
     process_images_to_pickle(args.anon_path, {}, 'anonymized')
 
     # ✅ 저장된 얼굴 벡터 로드
@@ -46,10 +46,11 @@ def main():
     with open("dataset_embeddings.pkl", "rb") as f:
         dataset_embeddings = pickle.load(f)
 
-    identification_score = face_identification_reid(original_embeddings, anonymized_embeddings, dataset_embeddings)
+    identification_score1, identification_score2 = face_identification_reid(original_embeddings, anonymized_embeddings, dataset_embeddings)
     
     # ✅ 결과 출력
-    print(f"🔹 Face Identification (1:N) Re-ID Rate: {identification_score * 100:.2f}%")
+    print(f"🔹 Face Identification (1:N) Re-ID Rate: {identification_score1 * 100:.2f}% (denominator = num of original = 200)")
+    print(f"🔹 Face Identification (1:N) Re-ID Rate: {identification_score2 * 100:.2f}% (denominator = num of anonymized)")
 
     # print("#" * 100)
     # orig_stats, anon_stats, diff_stats, diff_df = compare_agr(args.origin_path, args.anon_path, args.label_path)

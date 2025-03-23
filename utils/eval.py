@@ -388,6 +388,7 @@ def process_images_to_pickle(folder_path, embedding_dict, category):
 def face_identification_reid(original_embeddings, anonymized_embeddings, dataset_embeddings):
     match_count = 0
     total_faces = len(original_embeddings)
+    total_anons = len(anonymized_embeddings)
 
     for filename, orig_emb in original_embeddings.items():
         if filename in anonymized_embeddings:
@@ -407,4 +408,4 @@ def face_identification_reid(original_embeddings, anonymized_embeddings, dataset
             if best_match_filename == filename:
                 match_count += 1
 
-    return match_count / total_faces if total_faces > 0 else 0
+    return match_count / total_faces if total_faces > 0 else 0, match_count / total_anons if total_anons > 0 else 0
