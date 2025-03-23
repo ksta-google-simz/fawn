@@ -7,7 +7,7 @@ from utils.eval import eval_fid, process_images_to_pickle, face_identification_r
 
 def main():
     parser = argparse.ArgumentParser(description="이미지 익명화 및 평가 스크립트")
-    parser.add_argument("--origin_path", type=str, required=True, help="원본 이미지 폴더 경로")
+    parser.add_argument("--origin_path", type=str, default="my_dataset/original/", help="원본 이미지 폴더 경로")
     parser.add_argument("--anon_path", type=str, default="my_dataset/anon/", help="익명화 이미지 저장 폴더 경로")
     parser.add_argument("--label_path", type=str, default="my_dataset/fairface_label_val.csv", help="agr 관련 수치들 저장 경로")
     parser.add_argument("--num_inference_steps", type=int, default=25, help="추론 단계 수 (default: 25)")
