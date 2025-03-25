@@ -4,10 +4,11 @@ import pickle
 import os
 from PIL import Image
 
+EXCLUSION_FACE_IMAGES_DIR = "exclusion_faces_imgs"  # ✅ 새 폴더 경로 추가
 EXCLUSION_FACE_FEATURES_FILE = "exclusion_faces.pkl"  # 저장할 파일
 
 def save_exclusion_faces(image_paths):
-    """여러 명의 얼굴 특징을 저장하는 함수"""
+    """여러 명의 얼굴 특징을 저장하고 썸네일도 저장"""
     exclusion_faces = []
 
     # 기존 얼굴 로드
@@ -15,9 +16,12 @@ def save_exclusion_faces(image_paths):
         with open(EXCLUSION_FACE_FEATURES_FILE, "rb") as f:
             exclusion_faces = pickle.load(f)
 
-    for image_path in image_paths:
+    os.makedirs(EXCLUSION_FACE_IMAGES_DIR, exist_ok=True)
+
+    start_index = len(exclusion_faces)  # ✅ 현재까지 저장된 얼굴 개수
+
+    for i, image_path in enumerate(image_paths):
         try:
-            # PIL로 열고 RGB로 강제 변환
             pil_image = Image.open(image_path).convert("RGB")
             image = np.array(pil_image)
 
@@ -25,14 +29,18 @@ def save_exclusion_faces(image_paths):
             print(f"🔍 {image_path}에서 감지된 얼굴 수: {len(face_encodings)}")
 
             if len(face_encodings) > 0:
-                exclusion_faces.append(face_encodings[0])  # 첫 번째 얼굴 특징 저장
+                exclusion_faces.append(face_encodings[0])
                 print(f"✅ {image_path} 얼굴 저장 완료")
+
+                # ✅ 썸네일 저장 (덮어쓰기 방지)
+                index = start_index + i + 1
+                thumb_path = os.path.join(EXCLUSION_FACE_IMAGES_DIR, f"face_{index:03}.jpg")
+                pil_image.save(thumb_path)
             else:
                 print(f"❌ {image_path} 얼굴을 찾을 수 없습니다.")
         except Exception as e:
             print(f"❌ {image_path} 처리 중 오류 발생: {e}")
 
-    # 저장
     with open(EXCLUSION_FACE_FEATURES_FILE, "wb") as f:
         pickle.dump(exclusion_faces, f)
 
@@ -51,13 +59,16 @@ def load_exclusion_faces():
 def reset_exclusion_faces():
     """익명화 제외 대상 초기화"""
     if os.path.exists(EXCLUSION_FACE_FEATURES_FILE):
-        try:
-            os.remove(EXCLUSION_FACE_FEATURES_FILE)
-            print("✅ 익명화 제외 대상이 초기화되었습니다.")
-        except Exception as e:
-            print(f"❌ 파일 삭제 중 오류 발생: {e}")
+        os.remove(EXCLUSION_FACE_FEATURES_FILE)
+        print("✅ 익명화 제외 대상이 초기화되었습니다.")
     else:
         print("⚠️ 익명화 제외 대상이 존재하지 않습니다.")
+
+    # ✅ 썸네일 폴더도 초기화
+    if os.path.exists(EXCLUSION_FACE_IMAGES_DIR):
+        for f in os.listdir(EXCLUSION_FACE_IMAGES_DIR):
+            os.remove(os.path.join(EXCLUSION_FACE_IMAGES_DIR, f))
+        print("🧹 썸네일 이미지도 삭제 완료")
 
 
 def is_exclusion_face(face_image, euclidean_threshold=0.4):
@@ -87,3 +98,12 @@ def is_exclusion_face(face_image, euclidean_threshold=0.4):
         return False
 
     return False  # 익명화 대상
+
+def load_exclusion_face_images():
+    """등록된 얼굴 이미지들 불러오기"""
+    if not os.path.exists(EXCLUSION_FACE_IMAGES_DIR):
+        return []
+    files = sorted(os.listdir(EXCLUSION_FACE_IMAGES_DIR))
+    valid_exts = (".jpg", ".jpeg", ".png", ".bmp", ".webp")  # 원하는 확장자 추가 가능
+    paths = [os.path.join(EXCLUSION_FACE_IMAGES_DIR, f) for f in files if f.lower().endswith(valid_exts)]
+    return paths

@@ -1,7 +1,10 @@
 import gradio as gr
-from utils.face_embedding import save_exclusion_faces, reset_exclusion_faces, load_exclusion_faces
+from utils.face_embedding import (
+    save_exclusion_faces, reset_exclusion_faces,
+    load_exclusion_faces, load_exclusion_face_images
+)
 from utils.anonymize_faces_in_image import anonymize_faces_in_image
-from interface.model_setup import pipe, generator, fa
+from model_setup import pipe, generator, fa
 from PIL import Image
 import tempfile
 import os
@@ -22,7 +25,8 @@ def reset_faces():
 
 def show_faces():
     faces = load_exclusion_faces()
-    return f"📦 등록된 얼굴 수: {len(faces)}"
+    face_imgs = load_exclusion_face_images()
+    return face_imgs, f"📦 등록된 얼굴 수: {len(faces)}"
 
 def run_anonymizer(image):
     if image is None:
@@ -47,13 +51,15 @@ with gr.Blocks() as demo:
         img = gr.Image(type="pil", label="익명화 제외할 얼굴")
         register_btn = gr.Button("등록")
         reset_btn = gr.Button("초기화")
-        show_btn = gr.Button("등록된 얼굴 수 보기")
+        show_btn = gr.Button("등록된 얼굴 보기")
         register_output = gr.Textbox()
         show_output = gr.Textbox()
         reset_output = gr.Textbox()
+    
+        gallery = gr.Gallery(label="등록된 얼굴 미리보기", show_label=True, elem_id="gallery")  # ✅ 추가
 
         register_btn.click(fn=register_face, inputs=img, outputs=register_output)
-        show_btn.click(fn=show_faces, outputs=show_output)
+        show_btn.click(fn=show_faces, outputs=[gallery, show_output])  # ✅ 수정
         reset_btn.click(fn=reset_faces, outputs=reset_output)
 
     with gr.Tab("2️⃣ 얼굴 익명화 실행"):
