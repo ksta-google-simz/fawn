@@ -5,7 +5,7 @@ import tempfile
 import os
 import shutil
 
-from single_anon import get_single_anon
+from reid.single_anon import get_single_anon
 from utils.face_embedding import save_exclusion_faces
 
 def run_pipeline(image_path, exclusion_image=None):
