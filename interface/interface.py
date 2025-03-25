@@ -1,7 +1,7 @@
 import gradio as gr
 from utils.face_embedding import save_exclusion_faces, reset_exclusion_faces, load_exclusion_faces
 from utils.anonymize_faces_in_image import anonymize_faces_in_image
-from model_setup import pipe, generator, fa
+from interface.model_setup import pipe, generator, fa
 from PIL import Image
 import tempfile
 import os
