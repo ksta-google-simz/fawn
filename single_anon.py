@@ -48,8 +48,8 @@ pipe = StableDiffusionReferenceNetPipeline(
     scheduler=scheduler,
 )
 
-
-pipe = pipe.to("cuda")
+device = "cuda" if torch.cuda.is_available() else "cpu"
+pipe = pipe.to(device)
 
 generator = torch.manual_seed(1)  # 랜덤성 고정하여 동일한 결과 출력
 
