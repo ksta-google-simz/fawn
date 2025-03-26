@@ -29,8 +29,8 @@ To evaluate the anonymization results from newly tuned model, we used:
 - The AGR indicators are calculated as follows : ![CodeCogsEqn (6)](https://github.com/user-attachments/assets/0061a7fa-a9e4-444b-9922-a26d7608077a)
 
 ## 💭 Results & Findings
-<img src="https://github.com/user-attachments/assets/c0d03587-4907-421c-8809-b3b317aaa111" alt="image" height="250"/>
-<img src="https://github.com/user-attachments/assets/df8deba6-fda6-44c6-886f-30bc67a1ca81" alt="image" height="250"/>
+<img src="https://github.com/user-attachments/assets/c0d03587-4907-421c-8809-b3b317aaa111" alt="image" height="150"/>
+<img src="https://github.com/user-attachments/assets/df8deba6-fda6-44c6-886f-30bc67a1ca81" alt="image" height="150"/>
 
 ### Num Inference
 - We conducted comparative experiments using num_inf values of 10 and 25 at three anonymization degrees: 0.75, 1.00, and 1.25. (Fig 1)
