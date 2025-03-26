@@ -25,7 +25,7 @@ To evaluate the anonymization results from newly tuned model, we used:
     - **Avg Similarity**: Calculated as the average cosine similarity between each original image and its anonymized counterpart across the dataset, providing a continuous measure of overall similarity.
 - **FID(Frechet inception Distance)** : Assess the visual quality of anonymized images through the PyTorch FID module.
 - **AGR Similarity**: Quantifies how naturally anonymized faces preserve Age, Gender, and Race attributes by comparing them between the original and anonymized images. This metric is critical in our project because it ensures that while faces are effectively anonymized, essential demographic features remain natural and recognizable. AGR Similarity bridges the gap between robust privacy protection and maintaining the intrinsic quality of facial attributes. The AGR indicators are calculated as follows : 
-![CodeCogsEqn (6)](https://github.com/user-attachments/assets/0061a7fa-a9e4-444b-9922-a26d7608077a)
+$$AGR = \alpha \cdot Age Dist. + \beta \cdot Gender Acc + \gamma \cdot Race Acc$$
 
 ## 💭 Results & Findings
 <img src="https://github.com/user-attachments/assets/c0d03587-4907-421c-8809-b3b317aaa111" alt="image" height="180"/>
@@ -38,8 +38,8 @@ To evaluate the anonymization results from newly tuned model, we used:
     - 25 steps: approximately 18.609 seconds per image
 - The results revealed no significant performance gains when increasing num_inf to 25. In some cases, using 10 steps even produced better outcomes. Based on these observations, we decided to set num_inf=10 for our experiments.
 ### Anonymization Degree
-- After normalizing the Re-ID and Avg Similarity metrics, we integrated them with the AGR metric by assigning weights of 0.25, 0.25, and 0.5 respectively : 
-![CodeCogsEqn (7)](https://github.com/user-attachments/assets/9545b16d-ea9c-40d7-a294-c98a9f83fd19)
+- After normalizing the Re-ID and Avg Similarity metrics, we integrated them with the AGR metric by assigning weights of 0.25, 0.25, and 0.5 respectively :
+$$Score_i = w_1 R'_i + w_2 S'_i + w_3 \, AGR_i$$
 - This composite score was used to determine the optimal anonymization degree.
 - Based on our experiments, the highest score (0.537) was achieved at an anonymization degree of 1.02, which we selected as the optimal setting. (Fig 4)
 
