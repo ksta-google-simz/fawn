@@ -1,8 +1,9 @@
 import argparse
 import pickle
 import time
-from single_anon import get_single_anon
+from reid.single_anon import get_single_anon
 from utils.eval import eval_fid, process_images_to_pickle, face_identification_reid, face_similarity
+
 
 
 def main():

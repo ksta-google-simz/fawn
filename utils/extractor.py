@@ -280,7 +280,8 @@ def get_transform_mat(image_landmarks, output_size, face_type, scale=1.0):
         l_t = np.array([g_c + [-side, -side], g_c + [side, -side], g_c + [side, side]])
 
     # calc affine transform from 3 global space points to 3 local space points size of 'output_size'
-    pts2 = np.float32(((0, 0), (output_size, 0), (output_size, output_size)))
+    l_t = np.array(l_t, dtype=np.float32).reshape(3, 2)
+    pts2 = np.array(((0, 0), (output_size, 0), (output_size, output_size)), dtype=np.float32)
     mat = cv2.getAffineTransform(l_t, pts2)
     return mat
 
