@@ -384,6 +384,29 @@ def process_images_to_pickle(folder_path, embedding_dict, category):
     print("✅ 얼굴 벡터 저장 완료!")
 
 
+# ✅ 1:1 얼굴 검증 방식 (Face Verification)
+def face_similarity(original_embeddings, anonymized_embeddings, threshold=0.8):
+    match_count = 0
+    total_faces = len(original_embeddings)
+    tot_sim = 0
+
+    for filename, orig_emb in original_embeddings.items():
+        if filename in anonymized_embeddings:
+            anon_emb = anonymized_embeddings[filename]
+            similarity = 1 - cosine(orig_emb, anon_emb)
+            tot_sim += similarity
+
+            print(f"🔹 {filename} | 유사도: {similarity:.3f}")  # ✅ 유사도 출력
+            
+            if similarity > threshold:  # 임계값 이상이면 동일 인물로 판단
+                match_count += 1
+
+    reid = match_count / total_faces if total_faces > 0 else 0
+    avg_sim = tot_sim / total_faces if total_faces > 0 else 0
+
+    return reid, avg_sim
+
+
 # ✅ 1:N 얼굴 식별 (Face Identification)
 def face_identification_reid(original_embeddings, anonymized_embeddings, dataset_embeddings):
     match_count = 0

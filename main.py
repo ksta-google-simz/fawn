@@ -2,7 +2,8 @@ import argparse
 import pickle
 import time
 from reid.single_anon import get_single_anon
-from utils.eval import eval_fid, process_images_to_pickle, face_identification_reid
+from utils.eval import eval_fid, process_images_to_pickle, face_identification_reid, face_similarity
+
 
 
 def main():
@@ -45,6 +46,10 @@ def main():
 
     with open("dataset_embeddings.pkl", "rb") as f:
         dataset_embeddings = pickle.load(f)
+
+    verification_reid, avg_sim = face_similarity(original_embeddings, anonymized_embeddings, threshold=0.8)
+    print(f"🔹 Face Identification (1:1) Re-ID Rate: {verification_reid * 100:.2f}%")
+    print(f"🔹 Face Average Similarity : {avg_sim * 100:.2f}%")
 
     identification_score1, identification_score2 = face_identification_reid(original_embeddings, anonymized_embeddings, dataset_embeddings)
     
