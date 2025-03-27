@@ -28,25 +28,69 @@ To evaluate the anonymization results from newly tuned model, we used:
 $$AGR = \alpha \cdot Age Dist. + \beta \cdot Gender Acc + \gamma \cdot Race Acc$$
 
 ## 💭 Results & Findings
-<img src="https://github.com/user-attachments/assets/c0d03587-4907-421c-8809-b3b317aaa111" alt="image" height="180"/>
-<img src="https://github.com/user-attachments/assets/df8deba6-fda6-44c6-886f-30bc67a1ca81" alt="image" height="180"/>
-
 ### Num Inference
-- We conducted comparative experiments using num_inf values of 10 and 25 at three anonymization degrees: 0.75, 1.00, and 1.25. (Fig 1)
-- The average inference times were measured as follows:
-    - 10 steps: approximately 8.716 seconds per image
-    - 25 steps: approximately 18.609 seconds per image
-- The results revealed no significant performance gains when increasing num_inf to 25. In some cases, using 10 steps even produced better outcomes. Based on these observations, we decided to set num_inf=10 for our experiments.
+<table>
+  <tr>
+    <td>
+      <p><img src="https://github.com/user-attachments/assets/c0d03587-4907-421c-8809-b3b317aaa111" alt="image"/></p>
+    </td>
+    <td>
+      <p>We conducted comparative experiments using num_inf values of 10 and 25 at three anonymization degrees: 0.75, 1.00, and 1.25. (Fig 1)</p>
+        <p>The average inference times were measured as follows:</p>
+        <ui>
+            <li>10 steps: approximately 8.716 seconds per image</li>
+            <li>25 steps: approximately 18.609 seconds per image</li>
+        </ui>
+        <p></p>
+        <p>The results revealed no significant performance gains when increasing num_inf to 25. In some cases, using 10 steps even produced better outcomes. Based on these observations, we decided to set num_inf=10 for our experiments.</p>
+    </td>
+  </tr>
+</table>
+
 ### Anonymization Degree
-- After normalizing the Re-ID and Avg Similarity metrics, we integrated them with the AGR metric by assigning weights of 0.25, 0.25, and 0.5 respectively :
-$$Score_i = w_1 R'_i + w_2 S'_i + w_3 \, AGR_i$$
-- This composite score was used to determine the optimal anonymization degree.
-- Based on our experiments, the highest score (0.537) was achieved at an anonymization degree of 1.02, which we selected as the optimal setting. (Fig 4)
+<table>
+  <tr>
+    <td>
+      <p><img src="https://github.com/user-attachments/assets/6c94087c-0a4d-47ff-acf3-4b3ddec62d1d" alt="image"/></p>
+    </td>
+    <td>
+      <p>We conducted comparative experiments using num_inf values of 10 and 25 at three anonymization degrees: 0.75, 1.00, and 1.25. (Fig 1)</p>
+        <p>After normalizing the Re-ID and Avg Similarity metrics, we integrated them with the AGR metric by assigning weights of 0.25, 0.25, and 0.5 respectively :
+$$Score_i = w_1 R'_i + w_2 S'_i + w_3 \, AGR_i$$</p>
+        <p>This composite score was used to determine the optimal anonymization degree.</p>
+        <p>Based on our experiments, the highest score (0.537) was achieved at an anonymization degree of 1.02, which we selected as the optimal setting. (Fig 4)</p>
+    </td>
+  </tr>
+</table>
 
-## 🗒️ Sample Result Table
+### Comparative Experiments: Paper’s Proposed Model vs. Our Tuned Model
+</br>
+<table>
+  <tr>
+    <td>
+        <p><img src="https://github.com/user-attachments/assets/6cba765e-440a-4916-9977-02e4a0e4c0ce" alt="image" </p>
+        <p><img src="https://github.com/user-attachments/assets/aacb29d4-bb5e-4202-b3bd-c5a05397e64e" alt="image" </p>
+    </td>
+    <td>
+      <p>As shown in Table 2, our tuned model demonstrates a noticeable decrease in Re-ID while achieving improvements in FID and AGR compared to the original paper’s model on the CelebA-HQ dataset.</p>
+        <p>Notably, the naturalness of the anonymized images is better preserved, and gender accuracy (Gender Acc.) increases significantly from about 45% to nearly 80%.</p>
+        <p>These results indicate that our approach not only lowers re-identification risk but also enhances overall image quality and attribute recognition performance.</p>
+    </td>
+  </tr>
+</table>
 
 
-## 🧠 Insights
+## 🗒️ References
+[1] H.-W. Kung, T. Varanka, S. Saha, T. Sim, and N. Sebe,
+“Face Anonymization Made Simple,” arXiv preprint arXiv:2411.00762, 2024.
+
+[2] A. Serengil, “DeepFace: A Python library for face recognition and facial attribute analysis,” GitHub repository, https://github.com/serengil/deepface, accessed Mar. 26, 2025.
+
+[3] K. Karkkainen and J. Joo, “FairFace: Face Attribute Dataset for Balanced Race, Gender, and Age for Bias Measurement and Mitigation,” in Proceedings of the IEEE/CVF Winter Conference on Applications of Computer Vision (WACV), 2021.
+
+[4] T. Karras, T. Aila, S. Laine, and J. Lehtinen, “CelebA-HQ: High-Quality Images for Face Attributes,” arXiv preprint arXiv:1710.10196, 2017.
+
+[5] T. Karras, S. Laine, and T. Aila, “FFHQ: A High-Quality Dataset of Human Faces,” arXiv preprint arXiv:1907.09661, 2019.
 
 ---
 🛠️ **project for** : KSTA NIPA Google ML Bootcamp Project 
