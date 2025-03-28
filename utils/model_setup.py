@@ -13,13 +13,13 @@ clip_model_id = "openai/clip-vit-large-patch14"
 sd_model_id = "stabilityai/stable-diffusion-2-1"
 
 # 모델 로드
-unet = UNet2DConditionModel.from_pretrained(face_model_id, subfolder="unet", use_safetensors=True)
-referencenet = ReferenceNetModel.from_pretrained(face_model_id, subfolder="referencenet", use_safetensors=True)
-conditioning_referencenet = ReferenceNetModel.from_pretrained(face_model_id, subfolder="conditioning_referencenet", use_safetensors=True)
-vae = AutoencoderKL.from_pretrained(sd_model_id, subfolder="vae", use_safetensors=True)
-scheduler = DDPMScheduler.from_pretrained(sd_model_id, subfolder="scheduler", use_safetensors=True)
-feature_extractor = CLIPImageProcessor.from_pretrained(clip_model_id, use_safetensors=True)
-image_encoder = CLIPVisionModel.from_pretrained(clip_model_id, use_safetensors=True)
+unet = UNet2DConditionModel.from_pretrained(face_model_id, subfolder="unet", use_safetensors=True, torch_dtype=torch.float16)
+referencenet = ReferenceNetModel.from_pretrained(face_model_id, subfolder="referencenet", use_safetensors=True, torch_dtype=torch.float16)
+conditioning_referencenet = ReferenceNetModel.from_pretrained(face_model_id, subfolder="conditioning_referencenet", use_safetensors=True, torch_dtype=torch.float16)
+vae = AutoencoderKL.from_pretrained(sd_model_id, subfolder="vae", use_safetensors=True, torch_dtype=torch.float16)
+scheduler = DDPMScheduler.from_pretrained(sd_model_id, subfolder="scheduler", use_safetensors=True, torch_dtype=torch.float16)
+feature_extractor = CLIPImageProcessor.from_pretrained(clip_model_id, use_safetensors=True, torch_dtype=torch.float16)
+image_encoder = CLIPVisionModel.from_pretrained(clip_model_id, use_safetensors=True, torch_dtype=torch.float16)
 
 pipe = StableDiffusionReferenceNetPipeline(
     unet=unet,

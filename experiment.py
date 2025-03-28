@@ -34,7 +34,7 @@ def main():
 
     print("#" * 100)
     
-    # process_images_to_pickle(args.origin_path, {}, 'original')
+    process_images_to_pickle(args.origin_path, {}, 'original')
     process_images_to_pickle(args.anon_path, {}, 'anonymized')
 
     # ✅ 저장된 얼굴 벡터 로드
@@ -44,7 +44,7 @@ def main():
     with open("anonymized_embeddings.pkl", "rb") as f:
         anonymized_embeddings = pickle.load(f)
 
-    with open("dataset_embeddings.pkl", "rb") as f:
+    with open("original_embeddings.pkl", "rb") as f: # 만약 별도의 dataset_embeddings.pkl이 존재한다면 이 부분을 수정하세요
         dataset_embeddings = pickle.load(f)
 
     verification_reid, avg_sim = face_similarity(original_embeddings, anonymized_embeddings, threshold=0.8)
@@ -56,20 +56,6 @@ def main():
     # ✅ 결과 출력
     print(f"🔹 Face Identification (1:N) Re-ID Rate: {identification_score1 * 100:.2f}% (denominator = num of original = 200)")
     print(f"🔹 Face Identification (1:N) Re-ID Rate: {identification_score2 * 100:.2f}% (denominator = num of anonymized)")
-
-    # print("#" * 100)
-    # orig_stats, anon_stats, diff_stats, diff_df = compare_agr(args.origin_path, args.anon_path, args.label_path)
-    # print("\nOriginal image statistics:")
-    # for key, value in orig_stats.items():
-    #     print(f"{key}: {value:.4f}")
-    # print("\nAnonymized image statistics:")
-    # for key, value in anon_stats.items():
-    #     print(f"{key}: {value:.4f}")
-    # print("\nDifference statistics:")
-    # for key, value in diff_stats.items():
-    #     print(f"{key}: {value:.4f}")
-    # print("\nFirst few comparison results:")
-    # print(diff_df.head())
 
 if __name__ == "__main__":
     main()
