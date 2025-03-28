@@ -1,6 +1,9 @@
 # F.A.W.N
 : Face Anonymization With Neural-networks
 
+![KakaoTalk_20250328_092353853](https://github.com/user-attachments/assets/23fbfff6-1af7-486c-88eb-79ff52a133bb)
+
+
 An selective face anonymization AI system that anonymizes all faces except for pre-registered individuals. This project extends the model [`face_anon_simple`](https://github.com/hanweikung/face_anon_simple) by adding
 - ☑️ **Identity exclusion logic** for registered faces
 - 📊 **Performace evaluation metircs** including FID, ReID, and AGR(AGR model: [`serengil_deepface`](https://github.com/serengil/deepface))
@@ -51,7 +54,7 @@ $$AGR = \alpha \cdot Age Dist. + \beta \cdot Gender Acc + \gamma \cdot Race Acc$
 <table>
   <tr>
     <td>
-      <p><img src="https://github.com/user-attachments/assets/6c94087c-0a4d-47ff-acf3-4b3ddec62d1d" alt="image"/></p>
+      <p><img src="https://github.com/user-attachments/assets/dff92a6a-9cca-48c5-8123-25555d75698c" alt="image"/></p>
     </td>
     <td>
       <p>We conducted comparative experiments using num_inf values of 10 and 25 at three anonymization degrees: 0.75, 1.00, and 1.25. (Fig 1)</p>
