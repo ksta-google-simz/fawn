@@ -1,0 +1,6 @@
+__pycache__/
+.gradio/
+exclusion_faces_imgs/
+exclusion_faces.pkl
+.venv
+.ipynb_checkpoints/

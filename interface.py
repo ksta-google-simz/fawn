@@ -4,7 +4,7 @@ from utils.face_embedding import (
     load_exclusion_faces, load_exclusion_face_images
 )
 from utils.anonymize_faces_in_image import anonymize_faces_in_image
-from model_setup import pipe, generator, fa
+from utils.model_setup import pipe, generator, fa
 from PIL import Image
 import tempfile
 import os
@@ -40,7 +40,7 @@ def run_anonymizer(image):
         face_image_size=512,
         num_inference_steps=10,
         guidance_scale=4.0,
-        anonymization_degree=1.25
+        anonymization_degree=1.02
     )
     return anon_image, "✅ 익명화 완료!"
 
